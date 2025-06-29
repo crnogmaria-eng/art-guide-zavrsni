@@ -1,0 +1,27 @@
+<section
+  class="questionnaire-wrapper"
+  [ngStyle]="{
+    'background-image': 'url(https://firebasestorage.googleapis.com/v0/b/art-guid-new.firebasestorage.app/o/mayb.jpeg?alt=media&token=e3d6f510-84e5-4379-8922-5315a25c5613)'
+  }"
+>
+  <div class="questionnaire-overlay">
+    <div class="questionnaire-box">
+      <h2>Koje stilove umjetnosti voliš?</h2>
+
+      <div class="questionnaire-checkboxes">
+        <div *ngFor="let style of artStyles" class="checkbox-item">
+          <input
+            type="checkbox"
+            [value]="style"
+            [checked]="selectedStyles.includes(style)"
+            (change)="onCheckboxChange($event, style)"
+            id="{{ style }}"
+          />
+          <label for="{{ style }}">{{ style }}</label>
+        </div>
+      </div>
+
+      <button (click)="submitPreferences()" class="btn-save">✅ Spremi</button>
+    </div>
+  </div>
+</section>

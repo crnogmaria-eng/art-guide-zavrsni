@@ -1,0 +1,39 @@
+<section class="section">
+  <div class="container">
+    <h2 class="text-center mb-5">👤 Moj profil</h2>
+
+    <h4 class="mb-4">🎟️ Kupljene ulaznice</h4>
+
+    <div *ngIf="(tickets$ | async)?.length; else noTickets" class="ticket-grid">
+      <div *ngFor="let ticket of (tickets$ | async)" class="ticket-card">
+
+        <div class="ticket-content">
+          <h5>{{ ticket.title }}</h5>
+          <p><span class="icon">🎨</span> <strong>Umjetnik:</strong> {{ ticket.artist }}</p>
+          <p><span class="icon">📍</span> <strong>Lokacija:</strong> {{ ticket.location }}</p>
+          <p><span class="icon">🕒</span> <strong>Kupljeno:</strong> {{ ticket.purchasedAt | date:'short' }}</p>
+        </div>
+
+      </div>
+    </div>
+
+    <ng-template #noTickets>
+      <p class="text-center">⛔ Nema kupljenih ulaznica.</p>
+    </ng-template>
+
+    
+    <div class="mt-5">
+      <h4>🎨 Preferirani stilovi</h4>
+      <ul *ngIf="preferences.length; else noPrefs">
+        <li *ngFor="let style of preferences">✔️ {{ style }}</li>
+      </ul>
+      <ng-template #noPrefs>
+        <p>⛔ Nema spremljenih preferencija.</p>
+      </ng-template>
+    </div>
+  </div>
+</section>
+
+
+
+

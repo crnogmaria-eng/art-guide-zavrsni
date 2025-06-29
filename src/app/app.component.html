@@ -1,0 +1,26 @@
+<header class="custom-navbar">
+  <div class="custom-navbar-container">
+    <a routerLink="/" class="logo">🎨 ArtGuide</a>
+
+    <nav class="nav-links">
+      <a routerLink="/home" routerLinkActive="active-link">Početna</a>
+      <a routerLink="/artist-search" routerLinkActive="active-link">Pretraga umjetnika</a>
+      <a *ngIf="isLoggedIn" routerLink="/questionnaire" routerLinkActive="active-link">Upitnik</a>
+      <a *ngIf="isLoggedIn" routerLink="/profile" routerLinkActive="active-link">Profil</a>
+      <a *ngIf="!isLoggedIn" routerLink="/login" routerLinkActive="active-link">Prijava</a>
+      <a *ngIf="!isLoggedIn" routerLink="/register" routerLinkActive="active-link">Registracija</a>
+      <button *ngIf="isLoggedIn" (click)="logout()" class="logout-btn">🚪 Odjavi se</button>
+    </nav>
+  </div>
+</header>
+
+<!-- pomak -->
+<div style="padding-top: 70px;">
+  <router-outlet></router-outlet>
+</div>
+
+
+
+
+
+

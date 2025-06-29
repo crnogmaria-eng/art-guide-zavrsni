@@ -1,0 +1,57 @@
+
+<section
+  class="hero-section"
+  [ngStyle]="{
+    'background-image': 'url(' +
+    'https://firebasestorage.googleapis.com/v0/b/art-guid-new.firebasestorage.app/o/pozadinaa.jpg?alt=media&token=09b8104c-48df-4979-9915-018b9ff19a64' +
+    ')'
+  }"
+>
+  <div class="hero-blur-layer"></div>
+  <div class="hero-overlay">
+    <div class="hero-text">
+      <h1>{{ heroTitle }}</h1>
+      <div class="search-box">
+        <button routerLink="/artist-search" class="explore-button">🔍 Istraži</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+<!-- PREPORUKE -->
+<section class="locations-section">
+  <div class="container">
+
+    <h2 class="section-heading">🎯 Preporučene lokacije</h2>
+
+    <div *ngIf="isLoggedIn && !userPreferences.length" class="text-center mb-4">
+      <p>📋 Nisi još ispunio upitnik.</p>
+      <button routerLink="/questionnaire" class="btn btn-success">Ispuni upitnik</button>
+    </div>
+
+    <ng-container *ngIf="userPreferences.length">
+      <div *ngIf="filteredLocations.length; else noResults" class="card-grid">
+        <div *ngFor="let loc of filteredLocations" class="location-card">
+          <h3>{{ loc.name }}</h3>
+          <p>📍 <strong>Adresa:</strong> {{ loc.address }}</p>
+          <p>🎨 <strong>Stilovi:</strong> {{ loc.styles.join(', ') }}</p>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #noResults>
+      <p class="text-center">😢 Nema preporučenih lokacija za tvoje preferencije.</p>
+    </ng-template>
+
+    <div *ngIf="userPreferences.length" class="text-center mt-4">
+      <button (click)="resetPreferences()" class="btn btn-warning">🔄 Reset preferencija</button>
+    </div>
+
+    
+
+  </div>
+</section>
