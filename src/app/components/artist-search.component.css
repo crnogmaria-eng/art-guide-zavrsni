@@ -1,11 +1,11 @@
-/*siva traka*/
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* glavna pozadina*/
+
 :host {
   display: block;
   background-color: white !important;

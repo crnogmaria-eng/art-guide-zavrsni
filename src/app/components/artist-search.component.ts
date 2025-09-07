@@ -41,7 +41,7 @@ export class ArtistSearchComponent {
       item.name.toLowerCase().includes(this.query.toLowerCase())
     );
 
-    // reset ako nova pretraga
+    
     this.selectedArtwork = null;
     this.ticketPurchased = false;
   }
@@ -54,9 +54,7 @@ export class ArtistSearchComponent {
     this.ticketPurchased = false;
   }
 
-  /*buyTicket() {
-    this.ticketPurchased = true;
-  }*/
+  
  auth = inject(Auth);
   async buyTicket() {
     const user = this.auth.currentUser;
@@ -67,7 +65,7 @@ export class ArtistSearchComponent {
       artist: this.selectedArtwork.name,
       location: this.selectedArtwork.location,
       imageUrl: this.selectedArtwork.imageUrl,
-      date: new Date().toISOString(),           // mozes ovdje kasnije dodati pravu datum izložbe
+      date: new Date().toISOString(),           
       purchasedAt: new Date().toISOString()
     };
 

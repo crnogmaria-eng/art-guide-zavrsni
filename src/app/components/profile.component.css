@@ -11,7 +11,7 @@ html {
   color: #212529;
 }
 
-/* naslovi */
+
 h2.text-center {
   font-size: 2rem;
   margin-bottom: 30px;
@@ -61,7 +61,7 @@ h4 {
   margin-right: 6px;
 }
 
-/* preferencije */
+
 ul {
   list-style: none;
   padding-left: 0;

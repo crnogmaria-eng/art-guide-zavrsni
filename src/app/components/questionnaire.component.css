@@ -31,7 +31,7 @@ html {
 .questionnaire-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.3); /* zamucenje */
+  background: rgba(0, 0, 0, 0.3); 
   display: flex;
   align-items: center;
   justify-content: center;
@@ -66,7 +66,7 @@ html {
   margin-bottom: 20px;
 }
 
-/* pojedinacni checkbox s labelom */
+
 .checkbox-item {
   background-color: #f0f0f0;
   padding: 8px 12px;

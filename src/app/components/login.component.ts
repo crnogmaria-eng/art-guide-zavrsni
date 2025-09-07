@@ -24,7 +24,7 @@ export class LoginComponent {
   async login() {
     try {
       await this.authService.login(this.email, this.password);
-      this.router.navigate(['/']); //  navigacija na home nakon prijav
+      this.router.navigate(['/']); 
     } catch (error: any) {
       this.errorMessage = error.message || 'Greška pri prijavi.';
     }

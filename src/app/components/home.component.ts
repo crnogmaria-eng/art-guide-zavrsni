@@ -32,7 +32,7 @@ export class HomeComponent implements OnInit {
   userPreferences: string[] = [];
   filteredLocations: ArtLocation[] = [];
   heroTitle: string = 'Istraži svijet umjetnosti';
-  //query: string = '';
+  
 
 
   allLocations: ArtLocation[] = [
@@ -64,7 +64,7 @@ export class HomeComponent implements OnInit {
       }
     });
     runInInjectionContext(this.injector, async () => {
-  const imageRef = ref(this.storage, 'hero/pozadina.jpg'); // putanja u firebase 
+  const imageRef = ref(this.storage, 'hero/pozadina.jpg'); 
   this.backgroundUrl = await getDownloadURL(imageRef);
 });
 

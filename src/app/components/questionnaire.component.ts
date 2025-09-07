@@ -17,13 +17,13 @@ export class QuestionnaireComponent {
 
   constructor(private userService: UserService, private router: Router) {}
 
-  //  kad klikne checkbox
+  
   onCheckboxChange(event: Event, style: string) {
     const isChecked = (event.target as HTMLInputElement).checked;
     this.toggleStyle(style, isChecked);
   }
 
-  // doda ili makne stil iz liste odabranih
+  
   toggleStyle(style: string, isChecked: boolean) {
     if (isChecked) {
       this.selectedStyles.push(style);
@@ -32,7 +32,7 @@ export class QuestionnaireComponent {
     }
   }
 
-  // sprema preko servisa
+  
   async submitPreferences() {
     await this.userService.savePreferences(this.selectedStyles);
     this.router.navigate(['/home']);

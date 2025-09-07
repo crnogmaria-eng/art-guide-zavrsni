@@ -21,7 +21,7 @@ export class RegisterComponent {
   async register() {
     try {
       await this.authService.register(this.email, this.password);
-      this.router.navigate(['/questionnaire']); // nakon registracije idi na upitnik
+      this.router.navigate(['/questionnaire']); 
     } catch (error: any) {
       this.errorMessage = error.message;
     }
