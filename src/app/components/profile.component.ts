@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { Firestore, collection, collectionData, doc, getDoc } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
 import { Observable, of } from 'rxjs';
+import { AppUser } from '../models/AppUser';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.css']  
+  styleUrls: ['./profile.component.css']
 })
 export class ProfileComponent implements OnInit {
   firestore = inject(Firestore);
@@ -26,7 +27,7 @@ export class ProfileComponent implements OnInit {
 
     const userRef = doc(this.firestore, `users/${user.uid}`);
     const snapshot = await getDoc(userRef);
-    const userData: any = snapshot.data();
+    const userData = snapshot.data() as AppUser;
     this.preferences = userData?.preferences || [];
   }
 }

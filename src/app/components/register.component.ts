@@ -16,12 +16,19 @@ export class RegisterComponent {
   password: string = '';
   errorMessage: string = '';
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router) { }
+
+  ngOnInit() {
+    // Nakon refreshanja stranice, dohvati usera i ako postoji, preusmjeri na početnu
+    this.authService.currentUser.subscribe(x => {
+      if (x) this.router.navigate(['/']);
+    });
+  }
 
   async register() {
     try {
       await this.authService.register(this.email, this.password);
-      this.router.navigate(['/questionnaire']); 
+      this.router.navigate(['/questionnaire']);
     } catch (error: any) {
       this.errorMessage = error.message;
     }

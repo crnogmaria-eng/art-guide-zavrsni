@@ -9,6 +9,9 @@
       <a *ngIf="isLoggedIn" routerLink="/profile" routerLinkActive="active-link">Profil</a>
       <a *ngIf="!isLoggedIn" routerLink="/login" routerLinkActive="active-link">Prijava</a>
       <a *ngIf="!isLoggedIn" routerLink="/register" routerLinkActive="active-link">Registracija</a>
+      <a *ngIf="isAdmin" routerLink="/manage-users" routerLinkActive="active-link">Upravljanje korisnicima</a>
+      <a *ngIf="isAdmin" routerLink="/manage-artists" routerLinkActive="active-link">Upravljanje umjetnicima</a>
+      <a *ngIf="isAdmin" routerLink="/manage-questionnaire" routerLinkActive="active-link">Upravljanje upitnikom</a>
       <button *ngIf="isLoggedIn" (click)="logout()" class="logout-btn">🚪 Odjavi se</button>
     </nav>
   </div>
@@ -18,9 +21,3 @@
 <div style="padding-top: 70px;">
   <router-outlet></router-outlet>
 </div>
-
-
-
-
-
-
