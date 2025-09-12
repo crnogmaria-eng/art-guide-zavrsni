@@ -1,9 +1,6 @@
-<section
-  class="artist-search-hero"
-  [ngStyle]="{
+<section class="artist-search-hero" [ngStyle]="{
     'background-image': 'url(https://firebasestorage.googleapis.com/v0/b/art-guid-new.firebasestorage.app/o/mayb.jpeg?alt=media&token=e3d6f510-84e5-4379-8922-5315a25c5613)'
-  }"
->
+  }">
   <div class="artist-search-overlay">
     <div class="artist-search-content">
       <h2>Pretraži Umjetnika</h2>
@@ -15,20 +12,12 @@
   </div>
 </section>
 
-
-
 <div class="search-results-wrapper">
   <div *ngFor="let item of results" class="artwork-card" (click)="selectArtwork(item)">
     <h3>{{ item.name }}</h3>
     <p>📍 <strong>Lokacija:</strong> {{ item.location }}</p>
   </div>
 </div>
-
-
-
-
-
-
 
 <div *ngIf="selectedArtwork" class="custom-modal-overlay" (click)="closeDetailsByOverlay($event)">
   <div class="custom-modal-content" (click)="$event.stopPropagation()">
@@ -40,15 +29,14 @@
     <p><strong>Lokacija:</strong> {{ selectedArtwork.location }}</p>
     <p><strong>Opis:</strong> {{ selectedArtwork.description }}</p>
 
-    <img
-      *ngIf="selectedArtwork.imageUrl"
-      [src]="selectedArtwork.imageUrl"
-      alt="Slika umjetničkog djela"
-      class="img-fluid rounded mt-3"
-    />
+    <img *ngIf="selectedArtwork.imageUrl" [src]="selectedArtwork.imageUrl" alt="Slika umjetničkog djela"
+      class="img-fluid rounded mt-3" />
 
     <div class="mt-4 d-flex justify-content-end">
-      <button (click)="buyTicket()" class="btn btn-success me-2">🎟️ Kupi kartu</button>
+      <button (click)="buyTicket()" class="btn btn-success me-2" [disabled]="ticketPurchased">
+        <span *ngIf="!ticketPurchased"> 🎟️ Kupi kartu</span>
+        <span *ngIf="ticketPurchased">Karta kupljena</span>
+      </button>
       <button (click)="closeDetails()" class="btn btn-outline-secondary">Zatvori</button>
     </div>
 

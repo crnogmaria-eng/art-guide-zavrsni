@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Firestore, collection, collectionData, doc, getDoc } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
 import { Observable, of } from 'rxjs';
-import { AppUser } from '../models/AppUser';
+import { AppUser } from '../../models/AppUser';
 
 @Component({
   selector: 'app-profile',

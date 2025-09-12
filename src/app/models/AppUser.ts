@@ -1,5 +1,9 @@
+import { Ticket } from "./Ticket";
+
 export interface AppUser {
-    role?: string;
-    tickets?: string[];
+    id: string;
+    email: string;
+    role: string;
+    tickets?: Ticket[];
     preferences?: string[];
 }

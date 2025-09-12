@@ -20,12 +20,17 @@ export class AuthService {
       if (user) {
         const userRef = doc(this.firestore, `users/${user.uid}`);
         const snapshot = await getDoc(userRef);
-        const userData: AppUser = snapshot.exists() ? (snapshot.data() as AppUser) : { role: 'user', tickets: [], preferences: [] };
+        const userData: AppUser = snapshot.exists() ? (snapshot.data() as AppUser) : { id: '', email: '', role: 'user', tickets: [], preferences: [] };
+        userData.id = user.uid;
         this.currentUser.next(userData);
       } else {
         this.currentUser.next(null);
       }
     });
+  }
+
+  public get user(): AppUser | null {
+    return this.currentUser.value;
   }
 
   async login(email: string, password: string): Promise<void> {
@@ -34,6 +39,8 @@ export class AuthService {
       const userRef = doc(this.firestore, `users/${userCredential.user.uid}`);
       const snapshot = await getDoc(userRef);
       const userData = snapshot.data() as AppUser;
+      userData.id = userCredential.user.uid;
+      console.log(userData);
       this.currentUser.next(userData);
       console.log('Uspješna prijava:', userData);
 
@@ -41,10 +48,23 @@ export class AuthService {
     }
   }
 
+  async updateUserRef() {
+    const user = this.auth.currentUser;
+    if (user) {
+      const userRef = doc(this.firestore, `users/${user.uid}`);
+      const snapshot = await getDoc(userRef);
+      const userData: AppUser = snapshot.data() as AppUser;
+      userData.id = user.uid;
+      this.currentUser.next(userData);
+    }
+  }
+
   async register(email: string, password: string) {
     const userCredentials = await createUserWithEmailAndPassword(this.auth, email, password);
 
     const user: AppUser = {
+      id: userCredentials.user.uid,
+      email: email,
       role: 'user',
       tickets: [],
       preferences: []

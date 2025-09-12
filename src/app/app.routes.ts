@@ -1,12 +1,12 @@
 import { Routes } from '@angular/router';
-import { QuestionnaireComponent } from './components/questionnaire.component';
-import { HomeComponent } from './components/home.component';
-import { ArtistSearchComponent } from './components/artist-search.component';
-import { LoginComponent } from './components/login.component';
-import { RegisterComponent } from './components/register.component';
+import { QuestionnaireComponent } from './components/questionnaire/questionnaire.component';
+import { HomeComponent } from './components/home/home.component';
+import { ArtistSearchComponent } from './components/artist-search/artist-search.component';
+import { LoginComponent } from './components/login/login.component';
+import { RegisterComponent } from './components/register/register.component';
 import { AdminAuthGuard } from './services/admin-auth.guard';
-import { ManageUsersComponent } from './components/manage-users.component';
-import { ManageArtistComponent } from './components/manage-artist.component';
+import { ManageUsersComponent } from './components/admin-manage-users/manage-users.component';
+import { ManageArtistComponent } from './components/admin-manage-artist/manage-artists.component';
 import { ManageQuestionaireComponents } from './components/manage-questionaire.component';
 
 export const routes: Routes = [
@@ -18,7 +18,7 @@ export const routes: Routes = [
   { path: 'artist-search', component: ArtistSearchComponent },
   {
     path: 'profile',
-    loadComponent: () => import('./components/profile.component').then(m => m.ProfileComponent)
+    loadComponent: () => import('./components/profile/profile.component').then(m => m.ProfileComponent)
   },
 
   // Admin-protected management pages
@@ -28,7 +28,7 @@ export const routes: Routes = [
     canActivate: [AdminAuthGuard]
   },
   {
-    path: 'admin/manage-artist',
+    path: 'admin/manage-artists',
     component: ManageArtistComponent,
     canActivate: [AdminAuthGuard]
   },

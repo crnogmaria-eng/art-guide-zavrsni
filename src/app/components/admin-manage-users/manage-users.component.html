@@ -1,0 +1,63 @@
+<div class="manage-users">
+    <h2>Upravljanje korisnicima</h2>
+
+    <section class="list-section">
+        <h3>Korisnici</h3>
+
+        <table class="users-table" *ngIf="users?.length; else empty">
+            <thead>
+                <tr>
+                    <th style="width:12%">ID</th>
+                    <th style="width:12%">Email</th>
+                    <th style="width:12%">Uloga</th>
+                    <th>Preferenca</th>
+                    <th>Karte</th>
+                    <th style="width:18%">Akcija</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let user of users">
+                    <ng-container *ngIf="editingUser?.id !== user.id; else editRow">
+                        <td class="mono">{{ user.id }}</td>
+                        <td class="mono">{{ user.email }}</td>
+                        <td>
+                            {{ user.role }}
+                        </td>
+                        <td>{{ user.preferencesString }}</td>
+                        <td>{{ user.ticketsString }}</td>
+                        <td class="actions">
+                            <button class="btn" (click)="editUser(user)">Edit</button>
+                            <button class="btn danger" (click)="deleteUser(user.id)">Delete</button>
+                        </td>
+                    </ng-container>
+
+                    <ng-template #editRow>
+                        <td class="mono">{{ editingUser?.id }}</td>
+                        <td><input type="text" [(ngModel)]="editingUser!.email" /></td>
+                        <td>
+                            <select [(ngModel)]="editingUser!.role">
+                                <option value="user">user</option>
+                                <option value="admin">admin</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" [(ngModel)]="editingUser!.preferencesString" />
+                        </td>
+                        <td>
+                            <input type="text" [(ngModel)]="editingUser!.ticketsString" />
+                        </td>
+                        <td class="actions">
+                            <button class="btn" (click)="saveEdit()">Save</button>
+                            <button class="btn" (click)="cancelEdit()">Cancel</button>
+                        </td>
+                    </ng-template>
+                </tr>
+
+            </tbody>
+        </table>
+
+        <ng-template #empty>
+            <p>No users found.</p>
+        </ng-template>
+    </section>
+</div>

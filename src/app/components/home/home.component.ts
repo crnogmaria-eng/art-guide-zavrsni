@@ -1,12 +1,13 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { UserService } from '../services/user.service';
+import { UserService } from '../../services/user.service';
 import { Auth, onAuthStateChanged, User } from '@angular/fire/auth';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../../services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { getDownloadURL, ref, Storage } from '@angular/fire/storage';
 import { runInInjectionContext, Injector } from '@angular/core';
+import { Preferenca } from '../../models/Preferenca';
 
 
 interface ArtLocation {
@@ -32,15 +33,15 @@ export class HomeComponent implements OnInit {
   userPreferences: string[] = [];
   filteredLocations: ArtLocation[] = [];
   heroTitle: string = 'Istraži svijet umjetnosti';
-  
+
 
 
   allLocations: ArtLocation[] = [
-    { name: 'Muzej Moderne Umjetnosti', address: 'Ulica A 1', styles: ['Moderna'] },
-    { name: 'Galerija Klasike', address: 'Ulica B 2', styles: ['Klasična'] },
-    { name: 'Street Art Kutak', address: 'Ulica C 3', styles: ['Ulična'] },
-    { name: 'Foto Izložba', address: 'Ulica D 4', styles: ['Fotografija'] },
-    { name: 'Miješani Stilovi Galerija', address: 'Ulica E 5', styles: ['Moderna', 'Fotografija'] },
+    { name: 'Muzej Moderne Umjetnosti', address: 'Ulica A 1', styles: [Preferenca.Moderna] },
+    { name: 'Galerija Klasike', address: 'Ulica B 2', styles: [Preferenca.Klasicna] },
+    { name: 'Street Art Kutak', address: 'Ulica C 3', styles: [Preferenca.Ulicna] },
+    { name: 'Foto Izložba', address: 'Ulica D 4', styles: [Preferenca.Fotografija] },
+    { name: 'Miješani Stilovi Galerija', address: 'Ulica E 5', styles: [Preferenca.Moderna, Preferenca.Fotografija] },
   ];
 
   constructor(
@@ -48,7 +49,7 @@ export class HomeComponent implements OnInit {
     private router: Router,
     public authService: AuthService,
     private injector: Injector
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     onAuthStateChanged(this.auth, async (user: User | null) => {
@@ -64,9 +65,9 @@ export class HomeComponent implements OnInit {
       }
     });
     runInInjectionContext(this.injector, async () => {
-  const imageRef = ref(this.storage, 'hero/pozadina.jpg'); 
-  this.backgroundUrl = await getDownloadURL(imageRef);
-});
+      const imageRef = ref(this.storage, 'hero/pozadina.jpg');
+      this.backgroundUrl = await getDownloadURL(imageRef);
+    });
 
   }
 

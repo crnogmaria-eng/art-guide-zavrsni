@@ -22,11 +22,7 @@ export class AppComponent {
   auth = inject(Auth);
   router = inject(Router);
 
-  /**
-   *
-   */
-  constructor(private authService: AuthService) {
-  }
+  constructor(private authService: AuthService) { }
 
   get isLoggedIn(): boolean {
     return !!this.auth.currentUser;
