@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector, runInInjectionContext } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Firestore, collection, getDocs, setDoc, arrayUnion, getDoc, collectionGroup } from '@angular/fire/firestore';
 import { FormsModule } from '@angular/forms';
@@ -26,21 +26,26 @@ export class ArtistSearchComponent {
   private artists: Artist[] = [];
   private firestore: Firestore = inject(Firestore);
 
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService, private injector: Injector) { }
+
+  ngOnInit() {
+    runInInjectionContext(this.injector, async () => {
+      const artistsRef = collection(this.firestore, 'artist');
+      const artistsSnap = await getDocs(artistsRef);
+
+      this.artists = artistsSnap.docs.map(d => {
+        const a = d.data() as Artist;
+        a.id = d.id;
+        return a;
+      });
+    });
+
+  }
 
   async search() {
     console.log('Pretražujem za:', this.query);
 
     const q = (this.query || '').toString().trim().toLowerCase();
-
-    const artistsRef = collection(this.firestore, 'artist');
-    const artistsSnap = await getDocs(artistsRef);
-
-    this.artists = artistsSnap.docs.map(d => {
-      const a = d.data() as Artist;
-      a.id = d.id;
-      return a;
-    });
 
     const matchingArtists = this.artists.filter(a => a.fullName.toLowerCase().includes(q));
 

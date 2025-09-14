@@ -4,6 +4,8 @@ import { UserService } from '../../services/user.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Preferenca } from '../../models/Preferenca';
+import { AuthService } from '../../services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-questionnaire',
@@ -15,9 +17,21 @@ import { Preferenca } from '../../models/Preferenca';
 export class QuestionnaireComponent {
   selectedStyles: string[] = [];
   artStyles = [Preferenca.Moderna, Preferenca.Klasicna, Preferenca.Ulicna, Preferenca.Fotografija];
+  userSubscription: Subscription | null = null;
+  constructor(private userService: UserService, private router: Router, private authservice: AuthService) { }
 
-  constructor(private userService: UserService, private router: Router) { }
 
+  ngOnInit() {
+    this.userSubscription = this.authservice.currentUser.subscribe(user => {
+      if (user) {
+        this.selectedStyles = user.preferences || [];
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.userSubscription?.unsubscribe();
+  }
 
   onCheckboxChange(event: Event, style: string) {
     const isChecked = (event.target as HTMLInputElement).checked;

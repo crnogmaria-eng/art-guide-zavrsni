@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Injector, OnInit, runInInjectionContext } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Firestore, collection, doc, updateDoc, deleteDoc, getDocs } from '@angular/fire/firestore';
@@ -22,23 +22,27 @@ export class ManageUsersComponent implements OnInit {
 
   editingUser: (Partial<EditAppUser> | null) = null;
 
-  constructor(private firestore: Firestore) { }
+  constructor(private firestore: Firestore, private injector: Injector) { }
 
   ngOnInit() {
-    const usersCol = collection(this.firestore, 'users');
-    const artworksCol = collection(this.firestore, 'artworks');
+    runInInjectionContext(this.injector, async () => {
+      const usersCol = collection(this.firestore, 'users');
+      const artworksCol = collection(this.firestore, 'artworks');
 
-    forkJoin([getDocs(usersCol), getDocs(artworksCol)]).pipe(take(1)).subscribe(([usersSnap, artworksSnap]) => {
-      this.artworks = artworksSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Artwork[];
+      forkJoin([getDocs(usersCol), getDocs(artworksCol)]).pipe(take(1)).subscribe(([usersSnap, artworksSnap]) => {
+        this.artworks = artworksSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Artwork[];
 
-      this.users = usersSnap.docs.map(doc => {
-        const data = doc.data() as EditAppUser;
-        data.id = doc.id;
-        data.preferencesString = (data.preferences || []).join(', ');
-        data.ticketsString = ((data.tickets || []).map(x => this.artworks.find(e => e.id == x.artworkId)?.id)).join(', ');
-        return data;
+        this.users = usersSnap.docs.map(doc => {
+          const data = doc.data() as EditAppUser;
+          data.id = doc.id;
+          data.preferencesString = (data.preferences || []).join(', ');
+          data.ticketsString = ((data.tickets || []).map(x => this.artworks.find(e => e.id == x.artworkId)?.id)).join(', ');
+          return data;
+        });
       });
+
     });
+
   }
 
   // Begin editing a user

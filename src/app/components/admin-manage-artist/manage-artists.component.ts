@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, Injector, OnInit, runInInjectionContext } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Firestore, collection, getDocs, doc, updateDoc, deleteDoc, addDoc } from '@angular/fire/firestore';
@@ -25,19 +25,23 @@ export class ManageArtistComponent implements OnInit {
   // track artwork edits per artist
   artworkEditingMap: { [artistId: string]: { editingArtwork: Artwork | null; newArtwork: Partial<Artwork> | null } } = {};
 
+  constructor(private injector: Injector) { }
+
   async ngOnInit() {
-    const artistsCol = collection(this.firestore, 'artist');
+    runInInjectionContext(this.injector, async () => {
+      const artistsCol = collection(this.firestore, 'artist');
 
-    try {
-      const artistsSnap = await getDocs(artistsCol);
+      try {
+        const artistsSnap = await getDocs(artistsCol);
 
-      this.artists = artistsSnap.docs.map(d => {
-        const a = d.data() as Artist;
-        return { id: d.id, fullName: a.fullName, artwork: (a.artwork || []) } as Artist;
-      });
-    } catch (err) {
-      console.error('Failed to load artists or artworks', err);
-    }
+        this.artists = artistsSnap.docs.map(d => {
+          const a = d.data() as Artist;
+          return { id: d.id, fullName: a.fullName, artwork: (a.artwork || []) } as Artist;
+        });
+      } catch (err) {
+        console.error('Failed to load artists or artworks', err);
+      }
+    });
   }
 
   // Start editing an artist

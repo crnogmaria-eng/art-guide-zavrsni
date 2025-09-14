@@ -5,9 +5,10 @@ import { UserService } from '../../services/user.service';
 import { Auth, onAuthStateChanged, User } from '@angular/fire/auth';
 import { AuthService } from '../../services/auth.service';
 import { FormsModule } from '@angular/forms';
-import { getDownloadURL, ref, Storage } from '@angular/fire/storage';
+import { getDownloadURL, ref } from '@angular/fire/storage';
 import { runInInjectionContext, Injector } from '@angular/core';
 import { Preferenca } from '../../models/Preferenca';
+import { Subscription } from 'rxjs';
 
 
 interface ArtLocation {
@@ -24,16 +25,14 @@ interface ArtLocation {
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  private auth: Auth = inject(Auth);
   isLoggedIn = false;
   currentUserEmail: string | null = null;
-  storage = inject(Storage);
-  backgroundUrl: string = '';
 
   userPreferences: string[] = [];
   filteredLocations: ArtLocation[] = [];
   heroTitle: string = 'Istraži svijet umjetnosti';
 
+  private userSubscription: Subscription | null = null;
 
 
   allLocations: ArtLocation[] = [
@@ -48,27 +47,20 @@ export class HomeComponent implements OnInit {
     private userService: UserService,
     private router: Router,
     public authService: AuthService,
-    private injector: Injector
   ) { }
 
   ngOnInit(): void {
-    onAuthStateChanged(this.auth, async (user: User | null) => {
-      this.isLoggedIn = !!user;
-      this.currentUserEmail = user?.email ?? null;
 
-      if (this.isLoggedIn) {
-        this.userPreferences = await this.userService.getPreferences();
+    this.userSubscription = this.authService.currentUser.subscribe(user => {
+      if (user) {
+        this.userPreferences = user.preferences || [];
         this.filterLocations();
-      } else {
-        this.userPreferences = [];
-        this.filteredLocations = [];
       }
-    });
-    runInInjectionContext(this.injector, async () => {
-      const imageRef = ref(this.storage, 'hero/pozadina.jpg');
-      this.backgroundUrl = await getDownloadURL(imageRef);
-    });
+    })
+  }
 
+  ngOnDestroy() {
+    this.userSubscription?.unsubscribe();
   }
 
   logout() {
@@ -80,7 +72,7 @@ export class HomeComponent implements OnInit {
   private filterLocations() {
     this.filteredLocations = this.allLocations.filter(loc =>
       loc.styles.some(style => this.userPreferences.includes(style))
-    );
+    ) || [];
   }
 
   resetPreferences() {
