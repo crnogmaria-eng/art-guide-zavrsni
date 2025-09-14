@@ -11,8 +11,7 @@
       <a *ngIf="!isLoggedIn" routerLink="/register" routerLinkActive="active-link">Registracija</a>
       <a *ngIf="isAdmin" routerLink="/admin/manage-users" routerLinkActive="active-link">Upravljanje korisnicima</a>
       <a *ngIf="isAdmin" routerLink="/admin/manage-artists" routerLinkActive="active-link">Upravljanje umjetnicima</a>
-      <a *ngIf="isAdmin" routerLink="/admin/manage-questionnaire" routerLinkActive="active-link">Upravljanje
-        upitnikom</a>
+      <a *ngIf="isAdmin" routerLink="/admin/manage-locations" routerLinkActive="active-link">Upravljanje lokacijama</a>
       <button *ngIf="isLoggedIn" (click)="logout()" class="logout-btn">🚪 Odjavi se</button>
     </nav>
   </div>

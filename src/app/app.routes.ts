@@ -7,7 +7,7 @@ import { RegisterComponent } from './components/register/register.component';
 import { AdminAuthGuard } from './services/admin-auth.guard';
 import { ManageUsersComponent } from './components/admin-manage-users/manage-users.component';
 import { ManageArtistComponent } from './components/admin-manage-artist/manage-artists.component';
-import { ManageQuestionaireComponents } from './components/manage-questionaire.component';
+import { ManageLocationsComponent } from './components/admin-manage-locations/manage-locations.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'questionnaire', pathMatch: 'full' },
@@ -33,10 +33,8 @@ export const routes: Routes = [
     canActivate: [AdminAuthGuard]
   },
   {
-    path: 'admin/manage-questionaire',
-    component: ManageQuestionaireComponents,
+    path: 'admin/manage-locations',
+    component: ManageLocationsComponent,
     canActivate: [AdminAuthGuard]
   },
-
-  // duplicate removed intentionally (keep existing artist-search entry above)
 ];

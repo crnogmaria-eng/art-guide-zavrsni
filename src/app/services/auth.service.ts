@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Injector, inject, runInInjectionContext } from '@angular/core';
 import { Auth, signInWithEmailAndPassword, signOut, User, onAuthStateChanged } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -14,7 +14,7 @@ export class AuthService {
   private router: Router = inject(Router);
   public currentUser: BehaviorSubject<AppUser | null> = new BehaviorSubject<AppUser | null>(null);
 
-  constructor() {
+  constructor(private injector: Injector) {
     // Ako se refresha stranica, zadržati stanje prijavljenog korisnika
     onAuthStateChanged(this.auth, async (user) => {
       if (user) {
@@ -51,11 +51,14 @@ export class AuthService {
   async updateUserRef() {
     const user = this.auth.currentUser;
     if (user) {
-      const userRef = doc(this.firestore, `users/${user.uid}`);
-      const snapshot = await getDoc(userRef);
-      const userData: AppUser = snapshot.data() as AppUser;
-      userData.id = user.uid;
-      this.currentUser.next(userData);
+      await runInInjectionContext(this.injector, async () => {
+        const userRef = doc(this.firestore, `users/${user.uid}`);
+        const snapshot = await getDoc(userRef);
+        const userData: AppUser = snapshot.data() as AppUser;
+        userData.id = user.uid;
+        this.currentUser.next(userData);
+
+      });
     }
   }
 

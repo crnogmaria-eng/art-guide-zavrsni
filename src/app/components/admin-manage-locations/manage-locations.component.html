@@ -1,0 +1,64 @@
+<div class="manage-locations">
+    <h2>Upravljanje lokacijama</h2>
+
+    <section class="list-section">
+        <h3>Lokacije</h3>
+
+        <div class="form-row create-row">
+            <label>
+                Ime
+                <input type="text" [(ngModel)]="newLocation.name" placeholder="Naziv lokacije" />
+            </label>
+            <label>
+                Adresa
+                <input type="text" [(ngModel)]="newLocation.address" placeholder="Adresa" />
+            </label>
+            <label>
+                Stilovi (odvojeno zarezom)
+                <input type="text" [(ngModel)]="newLocation.stylesString" placeholder="npr. Moderna, Fotografija" />
+            </label>
+            <button class="btn primary" (click)="createLocation()">Kreiraj</button>
+        </div>
+
+        <table class="locations-table" *ngIf="locations?.length; else empty">
+            <thead>
+                <tr>
+                    <th style="width:12%">ID</th>
+                    <th style="width:25%">Ime</th>
+                    <th style="width:25%">Adresa</th>
+                    <th>Stilovi</th>
+                    <th style="width:18%">Akcija</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let loc of locations">
+                    <ng-container *ngIf="editingLocation?.id !== loc.id; else editRow">
+                        <td class="mono">{{ loc.id }}</td>
+                        <td>{{ loc.name }}</td>
+                        <td>{{ loc.address }}</td>
+                        <td>{{ (loc.styles || []).join(', ') }}</td>
+                        <td class="actions">
+                            <button class="btn" (click)="editLocation(loc)">Uredi</button>
+                            <button class="btn danger" (click)="deleteLocation(loc.id!)">Obriši</button>
+                        </td>
+                    </ng-container>
+
+                    <ng-template #editRow>
+                        <td class="mono">{{ editingLocation?.id }}</td>
+                        <td><input type="text" [(ngModel)]="editingLocation!.name" /></td>
+                        <td><input type="text" [(ngModel)]="editingLocation!.address" /></td>
+                        <td><input type="text" [(ngModel)]="editingLocation!.stylesString" /></td>
+                        <td class="actions">
+                            <button class="btn" (click)="saveEdit()">Spremi</button>
+                            <button class="btn" (click)="cancelEdit()">Odustani</button>
+                        </td>
+                    </ng-template>
+                </tr>
+            </tbody>
+        </table>
+
+        <ng-template #empty>
+            <p>Lokacije nisu pronađene.</p>
+        </ng-template>
+    </section>
+</div>

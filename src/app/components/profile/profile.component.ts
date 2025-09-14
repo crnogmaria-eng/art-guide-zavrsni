@@ -1,9 +1,10 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, Injector, OnInit, runInInjectionContext } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Firestore, collection, collectionData, doc, getDoc } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { AppUser } from '../../models/AppUser';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-profile',
@@ -14,20 +15,35 @@ import { AppUser } from '../../models/AppUser';
 })
 export class ProfileComponent implements OnInit {
   firestore = inject(Firestore);
-  auth = inject(Auth);
   tickets$: Observable<any[]> = of([]);
   preferences: string[] = [];
+  userSubscription: Subscription | null = null;
 
-  async ngOnInit() {
-    const user = this.auth.currentUser;
-    if (!user) return;
+  constructor(private injector: Injector, private authService: AuthService) {
+  }
 
-    const ticketsRef = collection(this.firestore, `users/${user.uid}/tickets`);
-    this.tickets$ = collectionData(ticketsRef, { idField: 'id' });
+  ngOnInit() {
+    this.userSubscription = this.authService.currentUser.subscribe(user => {
+      if (user) {
+        this.setProfileData(user);
+      }
+    });
+  }
 
-    const userRef = doc(this.firestore, `users/${user.uid}`);
-    const snapshot = await getDoc(userRef);
-    const userData = snapshot.data() as AppUser;
-    this.preferences = userData?.preferences || [];
+  ngOnDestroy() {
+    this.userSubscription?.unsubscribe();
+  }
+
+  private async setProfileData(user: AppUser) {
+    await runInInjectionContext(this.injector, async () => {
+      const ticketsRef = collection(this.firestore, `users/${user.id}/tickets`);
+      this.tickets$ = collectionData(ticketsRef, { idField: 'id' });
+
+      const userRef = doc(this.firestore, `users/${user.id}`);
+      const snapshot = await getDoc(userRef);
+      const userData = snapshot.data() as AppUser;
+      this.preferences = userData?.preferences || [];
+
+    });
   }
 }

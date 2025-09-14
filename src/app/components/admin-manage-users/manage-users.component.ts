@@ -24,19 +24,20 @@ export class ManageUsersComponent implements OnInit {
 
   constructor(private firestore: Firestore, private injector: Injector) { }
 
-  ngOnInit() {
-    runInInjectionContext(this.injector, async () => {
+  async ngOnInit() {
+    await runInInjectionContext(this.injector, async () => {
       const usersCol = collection(this.firestore, 'users');
-      const artworksCol = collection(this.firestore, 'artworks');
+      const artistCol = collection(this.firestore, 'artist');
 
-      forkJoin([getDocs(usersCol), getDocs(artworksCol)]).pipe(take(1)).subscribe(([usersSnap, artworksSnap]) => {
-        this.artworks = artworksSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Artwork[];
+      forkJoin([getDocs(usersCol), getDocs(artistCol)]).pipe(take(1)).subscribe(([usersSnap, artistsSnap]) => {
+        this.artworks = artistsSnap.docs.map(doc => doc.data() as Artwork);
 
         this.users = usersSnap.docs.map(doc => {
           const data = doc.data() as EditAppUser;
           data.id = doc.id;
           data.preferencesString = (data.preferences || []).join(', ');
-          data.ticketsString = ((data.tickets || []).map(x => this.artworks.find(e => e.id == x.artworkId)?.id)).join(', ');
+          data.ticketsString = ((data.tickets || []).filter(x => this.artworks.find(e => e.id == x.artworkId))
+            .map(x => this.artworks.find(e => e.id == x.artworkId)?.id)).join(', ');
           return data;
         });
       });

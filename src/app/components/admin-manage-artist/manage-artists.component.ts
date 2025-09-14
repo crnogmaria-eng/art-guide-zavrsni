@@ -28,7 +28,7 @@ export class ManageArtistComponent implements OnInit {
   constructor(private injector: Injector) { }
 
   async ngOnInit() {
-    runInInjectionContext(this.injector, async () => {
+    await runInInjectionContext(this.injector, async () => {
       const artistsCol = collection(this.firestore, 'artist');
 
       try {

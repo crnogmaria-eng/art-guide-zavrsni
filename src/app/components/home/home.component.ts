@@ -9,13 +9,9 @@ import { getDownloadURL, ref } from '@angular/fire/storage';
 import { runInInjectionContext, Injector } from '@angular/core';
 import { Preferenca } from '../../models/Preferenca';
 import { Subscription } from 'rxjs';
-
-
-interface ArtLocation {
-  name: string;
-  address: string;
-  styles: string[];
-}
+import { Firestore, getDocs } from '@angular/fire/firestore';
+import { collection } from 'firebase/firestore';
+import { ArtLocation } from '../../models/ArtLocation';
 
 @Component({
   selector: 'app-home',
@@ -27,6 +23,7 @@ interface ArtLocation {
 export class HomeComponent implements OnInit {
   isLoggedIn = false;
   currentUserEmail: string | null = null;
+  firestore = inject(Firestore);
 
   userPreferences: string[] = [];
   filteredLocations: ArtLocation[] = [];
@@ -35,21 +32,16 @@ export class HomeComponent implements OnInit {
   private userSubscription: Subscription | null = null;
 
 
-  allLocations: ArtLocation[] = [
-    { name: 'Muzej Moderne Umjetnosti', address: 'Ulica A 1', styles: [Preferenca.Moderna] },
-    { name: 'Galerija Klasike', address: 'Ulica B 2', styles: [Preferenca.Klasicna] },
-    { name: 'Street Art Kutak', address: 'Ulica C 3', styles: [Preferenca.Ulicna] },
-    { name: 'Foto Izložba', address: 'Ulica D 4', styles: [Preferenca.Fotografija] },
-    { name: 'Miješani Stilovi Galerija', address: 'Ulica E 5', styles: [Preferenca.Moderna, Preferenca.Fotografija] },
-  ];
+  allLocations: ArtLocation[] | null = null;
 
   constructor(
     private userService: UserService,
     private router: Router,
     public authService: AuthService,
+    private injector: Injector
   ) { }
 
-  ngOnInit(): void {
+  async ngOnInit() {
 
     this.userSubscription = this.authService.currentUser.subscribe(user => {
       if (user) {
@@ -57,6 +49,22 @@ export class HomeComponent implements OnInit {
         this.filterLocations();
       }
     })
+
+    await runInInjectionContext(this.injector, async () => {
+      try {
+        const locationsCol = collection(this.firestore, 'locations');
+        const locationsSnap = await getDocs(locationsCol);
+        this.allLocations = locationsSnap.docs.map(d => {
+          const location = d.data() as ArtLocation;
+          location.id = d.id;
+          return location;
+        });
+
+        this.filterLocations();
+      } catch (err) {
+        console.error('Failed to load locations', err);
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -70,7 +78,7 @@ export class HomeComponent implements OnInit {
   }
 
   private filterLocations() {
-    this.filteredLocations = this.allLocations.filter(loc =>
+    this.filteredLocations = this.allLocations?.filter(loc =>
       loc.styles.some(style => this.userPreferences.includes(style))
     ) || [];
   }
