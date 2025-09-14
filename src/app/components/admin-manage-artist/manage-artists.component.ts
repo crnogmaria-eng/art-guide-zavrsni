@@ -54,24 +54,28 @@ export class ManageArtistComponent implements OnInit {
   async saveEdit() {
     if (!this.editingArtist?.id) return;
     try {
-      const artistRef = doc(this.firestore, `artist/${this.editingArtist.id}`);
+      await runInInjectionContext(this.injector, async () => {
+        const artistRef = doc(this.firestore, `artist/${this.editingArtist?.id}`);
 
-      const artworkObjs = [] as Artwork[];
-      // artworkIds.map(id => this.artworks.find(a => a.id === id)).filter(Boolean) as Artwork[];
+        const artworkObjs = [] as Artwork[];
+        // artworkIds.map(id => this.artworks.find(a => a.id === id)).filter(Boolean) as Artwork[];
 
-      const updated: Artist = {
-        id: this.editingArtist.id,
-        fullName: this.editingArtist.fullName || '',
-        artwork: artworkObjs
-      };
+        const updated: Artist = {
+          id: this.editingArtist?.id || '',
+          fullName: this.editingArtist?.fullName || '',
+          artwork: artworkObjs
+        };
 
-      await updateDoc(artistRef, { fullName: updated.fullName, artwork: updated.artwork });
+        await updateDoc(artistRef, { fullName: updated.fullName, artwork: updated.artwork });
 
-      // reflect changes locally
-      const idx = this.artists.findIndex(a => a.id === updated.id);
-      if (idx >= 0) this.artists[idx] = updated;
+        // reflect changes locally
+        const idx = this.artists.findIndex(a => a.id === updated.id);
+        if (idx >= 0) this.artists[idx] = updated;
 
-      this.editingArtist = null;
+        this.editingArtist = null;
+
+      });
+
     } catch (err) {
       console.error('Failed to save artist edits', err);
     }
@@ -84,8 +88,12 @@ export class ManageArtistComponent implements OnInit {
   // Update a single field on the artist document
   async updateField(artistId: string, field: string, value: any) {
     try {
-      const artistRef = doc(this.firestore, `artist/${artistId}`);
-      await updateDoc(artistRef, { [field]: value });
+      await runInInjectionContext(this.injector, async () => {
+        const artistRef = doc(this.firestore, `artist/${artistId}`);
+        await updateDoc(artistRef, { [field]: value });
+
+      });
+
     } catch (err) {
       console.error('Failed to update artist field', err);
     }
@@ -94,9 +102,11 @@ export class ManageArtistComponent implements OnInit {
   // Delete artist
   async deleteArtist(artistId: string) {
     try {
-      const artistRef = doc(this.firestore, `artist/${artistId}`);
-      await deleteDoc(artistRef);
-      this.artists = this.artists.filter(a => a.id !== artistId);
+      await runInInjectionContext(this.injector, async () => {
+        const artistRef = doc(this.firestore, `artist/${artistId}`);
+        await deleteDoc(artistRef);
+        this.artists = this.artists.filter(a => a.id !== artistId);
+      });
     } catch (err) {
       console.error('Failed to delete artist', err);
     }
@@ -105,24 +115,26 @@ export class ManageArtistComponent implements OnInit {
   // Create a new artist document
   async createArtist() {
     try {
-      const artistsCol = collection(this.firestore, 'artists');
+      await runInInjectionContext(this.injector, async () => {
+        const artistsCol = collection(this.firestore, 'artists');
 
-      const artworkObjs = [] as Artwork[];
-      // artworkIds.map(id => this.artworks.find(a => a.id === id)).filter(Boolean) as Artwork[];
+        const artworkObjs = [] as Artwork[];
+        // artworkIds.map(id => this.artworks.find(a => a.id === id)).filter(Boolean) as Artwork[];
 
-      const payload: Partial<Artist> = {
-        fullName: this.newArtist.fullName || '',
-        artwork: artworkObjs
-      };
+        const payload: Partial<Artist> = {
+          fullName: this.newArtist.fullName || '',
+          artwork: artworkObjs
+        };
 
-      const createdRef = await addDoc(artistsCol, payload as any);
+        const createdRef = await addDoc(artistsCol, payload as any);
 
-      // reflect locally
-      const createdArtist: Artist = { id: createdRef.id, fullName: payload.fullName || '', artwork: payload.artwork || [] } as Artist;
-      this.artists.unshift(createdArtist);
+        // reflect locally
+        const createdArtist: Artist = { id: createdRef.id, fullName: payload.fullName || '', artwork: payload.artwork || [] } as Artist;
+        this.artists.unshift(createdArtist);
 
-      // reset form
-      this.newArtist = { fullName: '' };
+        // reset form
+        this.newArtist = { fullName: '' };
+      });
     } catch (err) {
       console.error('Failed to create artist', err);
     }
@@ -134,26 +146,29 @@ export class ManageArtistComponent implements OnInit {
     if (!entry || !entry.newArtwork) return;
 
     try {
-      const newId = doc(collection(this.firestore, 'artist', artistId, 'artwork')).id;
-      const artwork: Artwork = {
-        id: newId,
-        name: entry.newArtwork.name || '',
-        location: entry.newArtwork.location || '',
-        fileName: entry.newArtwork.fileName || '',
-        description: entry.newArtwork.description || ''
-      } as Artwork;
+      await runInInjectionContext(this.injector, async () => {
+        const newId = doc(collection(this.firestore, 'artist', artistId, 'artwork')).id;
+        const artwork: Artwork = {
+          id: newId,
+          name: entry.newArtwork?.name || '',
+          location: entry.newArtwork?.location || '',
+          fileName: entry.newArtwork?.fileName || '',
+          description: entry.newArtwork?.description || ''
+        } as Artwork;
 
-      const artistIdx = this.artists.findIndex(a => a.id === artistId);
-      if (artistIdx === -1) return;
+        const artistIdx = this.artists.findIndex(a => a.id === artistId);
+        if (artistIdx === -1) return;
 
-      const artistRef = doc(this.firestore, `artist/${artistId}`);
-      const updatedArtworks = [...(this.artists[artistIdx].artwork || []), artwork];
+        const artistRef = doc(this.firestore, `artist/${artistId}`);
+        const updatedArtworks = [...(this.artists[artistIdx].artwork || []), artwork];
 
-      await updateDoc(artistRef, { artwork: updatedArtworks });
+        await updateDoc(artistRef, { artwork: updatedArtworks });
 
-      // update local state
-      this.artists[artistIdx].artwork = updatedArtworks;
-      this.artworkEditingMap[artistId].newArtwork = null;
+        // update local state
+        this.artists[artistIdx].artwork = updatedArtworks;
+        this.artworkEditingMap[artistId].newArtwork = null;
+
+      });
     } catch (err) {
       console.error('Failed to create artwork', err);
     }
@@ -171,16 +186,18 @@ export class ManageArtistComponent implements OnInit {
     const entry = this.artworkEditingMap[artistId];
     if (!entry || !entry.editingArtwork) return;
     try {
-      const artistIdx = this.artists.findIndex(a => a.id === artistId);
-      if (artistIdx === -1) return;
+      await runInInjectionContext(this.injector, async () => {
+        const artistIdx = this.artists.findIndex(a => a.id === artistId);
+        if (artistIdx === -1) return;
 
-      const updatedArtworks = (this.artists[artistIdx].artwork || []).map(a => a.id === entry.editingArtwork!.id ? entry.editingArtwork! : a);
+        const updatedArtworks = (this.artists[artistIdx].artwork || []).map(a => a.id === entry.editingArtwork!.id ? entry.editingArtwork! : a);
 
-      const artistRef = doc(this.firestore, `artist/${artistId}`);
-      await updateDoc(artistRef, { artwork: updatedArtworks });
+        const artistRef = doc(this.firestore, `artist/${artistId}`);
+        await updateDoc(artistRef, { artwork: updatedArtworks });
 
-      this.artists[artistIdx].artwork = updatedArtworks;
-      this.artworkEditingMap[artistId].editingArtwork = null;
+        this.artists[artistIdx].artwork = updatedArtworks;
+        this.artworkEditingMap[artistId].editingArtwork = null;
+      });
     } catch (err) {
       console.error('Failed to save artwork', err);
     }
@@ -212,14 +229,17 @@ export class ManageArtistComponent implements OnInit {
   // Delete an artwork from an artist
   async deleteArtwork(artistId: string, artworkId: string) {
     try {
-      const artistIdx = this.artists.findIndex(a => a.id === artistId);
-      if (artistIdx === -1) return;
+      await runInInjectionContext(this.injector, async () => {
+        const artistIdx = this.artists.findIndex(a => a.id === artistId);
+        if (artistIdx === -1) return;
 
-      const updatedArtworks = (this.artists[artistIdx].artwork || []).filter(a => a.id !== artworkId);
-      const artistRef = doc(this.firestore, `artist/${artistId}`);
-      await updateDoc(artistRef, { artwork: updatedArtworks });
+        const updatedArtworks = (this.artists[artistIdx].artwork || []).filter(a => a.id !== artworkId);
+        const artistRef = doc(this.firestore, `artist/${artistId}`);
+        await updateDoc(artistRef, { artwork: updatedArtworks });
 
-      this.artists[artistIdx].artwork = updatedArtworks;
+        this.artists[artistIdx].artwork = updatedArtworks;
+
+      });
     } catch (err) {
       console.error('Failed to delete artwork', err);
     }
