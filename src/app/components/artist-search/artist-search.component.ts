@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Firestore, collection, getDocs, setDoc, arrayUnion, getDoc } from '@angular/fire/firestore';
+import { Firestore, collection, getDocs, setDoc, arrayUnion, getDoc, collectionGroup } from '@angular/fire/firestore';
 import { FormsModule } from '@angular/forms';
 
 import { doc } from '@angular/fire/firestore';
@@ -8,7 +8,8 @@ import { doc } from '@angular/fire/firestore';
 import { Artwork } from '../../models/Artwork';
 import { Ticket } from '../../models/Ticket';
 import { AuthService } from '../../services/auth.service';
-
+import { Artist } from '../../models/Artist';
+import { ShowArtwork } from '../../models/ShowArtwork';
 
 @Component({
   selector: 'app-artist-search',
@@ -19,32 +20,46 @@ import { AuthService } from '../../services/auth.service';
 })
 export class ArtistSearchComponent {
   query: string = '';
-  results: Artwork[] = [];
-  selectedArtwork: Artwork | null = null;
+  results: ShowArtwork[] = [];
+  selectedArtwork: ShowArtwork | null = null;
   ticketPurchased: boolean = false;
+  private artists: Artist[] = [];
+  private firestore: Firestore = inject(Firestore);
 
-  constructor(private firestore: Firestore, private authService: AuthService) { }
+  constructor(private authService: AuthService) { }
 
   async search() {
     console.log('Pretražujem za:', this.query);
-    const collectionRef = collection(this.firestore, 'artworks');
-    const snapshot = await getDocs(collectionRef);
-    const allDocs = snapshot.docs.map(doc => {
-      const data = doc.data() as Artwork;
-      data.id = doc.id;
-      return data;
+
+    const q = (this.query || '').toString().trim().toLowerCase();
+
+    const artistsRef = collection(this.firestore, 'artist');
+    const artistsSnap = await getDocs(artistsRef);
+
+    this.artists = artistsSnap.docs.map(d => {
+      const a = d.data() as Artist;
+      a.id = d.id;
+      return a;
     });
 
-    this.results = allDocs.filter(item =>
-      item.name.toLowerCase().includes(this.query.toLowerCase())
-    );
+    const matchingArtists = this.artists.filter(a => a.fullName.toLowerCase().includes(q));
 
+    this.results = matchingArtists.map(a => a.artwork.map(artwork => {
+      const showArtwork: ShowArtwork =
+      {
+        ...artwork,
+        artistName: a.fullName,
+        imagePath: `/assets/artworks/${artwork.fileName}`
+      };
+      return showArtwork;
+    })).flat();
+    console.log(this.results)
 
     this.selectedArtwork = null;
     this.ticketPurchased = false;
   }
 
-  selectArtwork(artwork: Artwork) {
+  selectArtwork(artwork: ShowArtwork) {
     this.selectedArtwork = artwork;
     this.ticketPurchased = this.authService.user?.tickets?.some(t => t.artworkId === artwork.id) || false;
   }

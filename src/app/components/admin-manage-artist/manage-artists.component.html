@@ -1,0 +1,136 @@
+<div class="manage-artists">
+    <h2>Upravljanje umjetnicima</h2>
+
+    <section class="list-section">
+        <h3>Umjetnici</h3>
+
+        <div class="form-row create-row create-artist">
+            <label>
+                Ime
+                <input type="text" [(ngModel)]="newArtist.fullName" placeholder="Ime umjetnika" />
+            </label>
+            <button class="btn primary" (click)="createArtist()">Kreiraj</button>
+        </div>
+
+        <table class="artists-table" *ngIf="artists?.length; else empty">
+            <thead>
+                <tr>
+                    <th style="width:12%">ID</th>
+                    <th style="width:30%">Ime</th>
+                    <th style="width:18%">Akcija</th>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-container *ngFor="let artist of artists">
+                    <tr>
+                        <ng-container *ngIf="editingArtist?.id !== artist.id; else editRow">
+                            <td class="mono">{{ artist.id }}</td>
+                            <td>{{ artist.fullName }}</td>
+                            <td class="actions">
+                                <button class="btn" (click)="editArtist(artist)">Uredi</button>
+                                <button class="btn" (click)="createEmptyArtwork(artist)">Nova umjetnina</button>
+                                <button class="btn danger" (click)="deleteArtist(artist.id)">Obriši</button>
+                            </td>
+                        </ng-container>
+
+                        <ng-template #editRow>
+                            <td class="mono">{{ editingArtist?.id }}</td>
+                            <td><input type="text" [(ngModel)]="editingArtist!.fullName" /></td>
+                            <td class="actions">
+                                <button class="btn" (click)="saveEdit()">Spremi</button>
+                                <button class="btn" (click)="cancelEdit()">Odustani</button>
+                            </td>
+                        </ng-template>
+                    </tr>
+
+                    <!-- Artwork sublist for this artist as nested table -->
+                    <tr class="artist-artworks-row">
+                        <td colspan="3">
+                            <div class="artworks-container">
+                                <h4>Umjetnine</h4>
+
+                                <table class="artworks-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:12%">ID</th>
+                                            <th style="width:20%">Ime</th>
+                                            <th style="width:20%">Lokacija</th>
+                                            <th style="width:20%">Opis</th>
+                                            <th style="width:18%">Ime datoteke slike</th>
+                                            <th style="width:10%">Akcija</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let aw of artist.artwork">
+                                            <ng-container
+                                                *ngIf="!(artworkEditingMap[artist.id]?.editingArtwork?.id === aw.id); else editArtworkTpl">
+                                                <td class="mono">{{ aw.id }}</td>
+                                                <td>{{ aw.name }}</td>
+                                                <td>{{ aw.location }}</td>
+                                                <td>{{ aw.description }}</td>
+                                                <td>{{ aw.fileName }}</td>
+                                                <td class="actions">
+                                                    <button class="btn"
+                                                        (click)="editArtwork(artist.id, aw)">Uredi</button>
+                                                    <button class="btn danger"
+                                                        (click)="deleteArtwork(artist.id, aw.id)">Obriši</button>
+                                                </td>
+                                            </ng-container>
+
+                                            <ng-template #editArtworkTpl>
+                                                <td class="mono">{{ editingArtworkId(artist.id) }}</td>
+                                                <td><input type="text"
+                                                        [(ngModel)]="artworkEditingMap[artist.id].editingArtwork!.name" />
+                                                </td>
+                                                <td><input type="text"
+                                                        [(ngModel)]="artworkEditingMap[artist.id].editingArtwork!.location" />
+                                                </td>
+                                                <td><input type="text"
+                                                        [(ngModel)]="artworkEditingMap[artist.id].editingArtwork!.description" />
+                                                </td>
+                                                <td><input type="text"
+                                                        [(ngModel)]="artworkEditingMap[artist.id].editingArtwork!.fileName" />
+                                                </td>
+                                                <td class="actions">
+                                                    <button class="btn" (click)="saveArtwork(artist.id)">Spremi</button>
+                                                    <button class="btn"
+                                                        (click)="cancelArtworkEdit(artist.id)">Odustani</button>
+                                                </td>
+                                            </ng-template>
+                                        </tr>
+
+                                        <!-- create artwork row -->
+                                        <tr
+                                            *ngIf="artworkEditingMap[artist.id] && artworkEditingMap[artist.id].newArtwork as newAw">
+                                            <td class="mono">(new)</td>
+                                            <td><input type="text" [(ngModel)]="newAw.name" /></td>
+                                            <td><input type="text" [(ngModel)]="newAw.location" /></td>
+                                            <td><input type="text" [(ngModel)]="newAw.description" /></td>
+                                            <td><input type="text" [(ngModel)]="newAw.fileName" /></td>
+                                            <td class="actions">
+                                                <button class="btn primary"
+                                                    (click)="createArtwork(artist.id)">Kreiraj</button>
+                                                <button class="btn"
+                                                    *ngIf="artworkEditingMap[artist.id] && artworkEditingMap[artist.id].newArtwork"
+                                                    (click)="cancelNewArtwork(artist.id)">Odustani</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <ng-container *ngIf="!artist.artwork || artist.artwork.length === 0">
+                                    <p>Ovaj umjetnik nema unesenih umjetnina.</p>
+                                </ng-container>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-container>
+
+            </tbody>
+        </table>
+
+        <ng-template #empty>
+            <p>Umjetnici nisu pronađeni.</p>
+        </ng-template>
+    </section>
+</div>

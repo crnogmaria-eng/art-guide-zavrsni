@@ -1,6 +1,4 @@
-<section class="artist-search-hero" [ngStyle]="{
-    'background-image': 'url(https://firebasestorage.googleapis.com/v0/b/art-guid-new.firebasestorage.app/o/mayb.jpeg?alt=media&token=e3d6f510-84e5-4379-8922-5315a25c5613)'
-  }">
+<section class="artist-search-hero">
   <div class="artist-search-overlay">
     <div class="artist-search-content">
       <h2>Pretraži Umjetnika</h2>
@@ -14,8 +12,9 @@
 
 <div class="search-results-wrapper">
   <div *ngFor="let item of results" class="artwork-card" (click)="selectArtwork(item)">
+    <div [style.backgroundImage]="'url(' + item.imagePath + ')'" class="artwork-card-image"></div>
     <h3>{{ item.name }}</h3>
-    <p>📍 <strong>Lokacija:</strong> {{ item.location }}</p>
+    <!-- <p>📍 <strong>Lokacija:</strong> {{ item.location }}</p> -->
   </div>
 </div>
 
@@ -24,12 +23,12 @@
 
     <button class="custom-close-btn" (click)="closeDetails()">×</button>
 
-    <h3>{{ selectedArtwork.title }}</h3>
-    <p><strong>Umjetnik:</strong> {{ selectedArtwork.name }}</p>
+    <h3>{{ selectedArtwork.name }}</h3>
+    <p><strong>Umjetnik:</strong> {{ selectedArtwork.artistName }}</p>
     <p><strong>Lokacija:</strong> {{ selectedArtwork.location }}</p>
     <p><strong>Opis:</strong> {{ selectedArtwork.description }}</p>
 
-    <img *ngIf="selectedArtwork.imageUrl" [src]="selectedArtwork.imageUrl" alt="Slika umjetničkog djela"
+    <img *ngIf="selectedArtwork.imagePath" [src]="selectedArtwork.imagePath" alt="Slika umjetničkog djela"
       class="img-fluid rounded mt-3" />
 
     <div class="mt-4 d-flex justify-content-end">

@@ -1,12 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Firestore, collection, collectionData, doc, updateDoc, deleteDoc } from '@angular/fire/firestore';
-import { combineLatest, forkJoin, Observable, Subscription, take } from 'rxjs';
+import { Firestore, collection, doc, updateDoc, deleteDoc, getDocs } from '@angular/fire/firestore';
+import { forkJoin, take } from 'rxjs';
 import { AppUser } from '../../models/AppUser';
 import { Ticket } from '../../models/Ticket';
 import { Artwork } from '../../models/Artwork';
-import { getDocs } from 'firebase/firestore';
 import { EditAppUser } from '../../models/EditAppUser';
 import { Preferenca } from '../../models/Preferenca';
 
