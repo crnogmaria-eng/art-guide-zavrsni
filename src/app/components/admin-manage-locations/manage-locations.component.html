@@ -17,6 +17,10 @@
                 Stilovi (odvojeno zarezom)
                 <input type="text" [(ngModel)]="newLocation.stylesString" placeholder="npr. Moderna, Fotografija" />
             </label>
+            <label>
+                Datum Izložbe (dd.mm.yyyy)
+                <input type="text" [(ngModel)]="newLocation.date" placeholder="dd.mm.yyyy" />
+            </label>
             <button class="btn primary" (click)="createLocation()">Kreiraj</button>
         </div>
 
@@ -27,6 +31,7 @@
                     <th style="width:25%">Ime</th>
                     <th style="width:25%">Adresa</th>
                     <th>Stilovi</th>
+                    <th>Datum Izložbe</th>
                     <th style="width:18%">Akcija</th>
                 </tr>
             </thead>
@@ -37,6 +42,7 @@
                         <td>{{ loc.name }}</td>
                         <td>{{ loc.address }}</td>
                         <td>{{ (loc.styles || []).join(', ') }}</td>
+                        <td>{{ formatDate(loc.date) }}</td>
                         <td class="actions">
                             <button class="btn" (click)="editLocation(loc)">Uredi</button>
                             <button class="btn danger" (click)="deleteLocation(loc.id!)">Obriši</button>
@@ -48,6 +54,7 @@
                         <td><input type="text" [(ngModel)]="editingLocation!.name" /></td>
                         <td><input type="text" [(ngModel)]="editingLocation!.address" /></td>
                         <td><input type="text" [(ngModel)]="editingLocation!.stylesString" /></td>
+                        <td><input type="text" [(ngModel)]="editingLocation!.date" placeholder="dd.mm.yyyy" /></td>
                         <td class="actions">
                             <button class="btn" (click)="saveEdit()">Spremi</button>
                             <button class="btn" (click)="cancelEdit()">Odustani</button>

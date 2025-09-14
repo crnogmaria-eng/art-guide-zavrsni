@@ -3,7 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Firestore, collection, getDocs, doc, updateDoc, deleteDoc, addDoc } from '@angular/fire/firestore';
 import { Artwork } from '../../models/Artwork';
+import { DropdownItem } from '../../models/DropdownItem';
+import { ArtLocation } from '../../models/ArtLocation';
 import { Artist } from '../../models/Artist';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-manage-artists',
@@ -25,22 +28,34 @@ export class ManageArtistComponent implements OnInit {
   // track artwork edits per artist
   artworkEditingMap: { [artistId: string]: { editingArtwork: Artwork | null; newArtwork: Partial<Artwork> | null } } = {};
 
+  // locations loaded from firestore for dropdowns
+  locations: DropdownItem[] = [];
+
   constructor(private injector: Injector) { }
 
   async ngOnInit() {
     await runInInjectionContext(this.injector, async () => {
       const artistsCol = collection(this.firestore, 'artist');
+      const locationsCol = collection(this.firestore, 'locations');
 
       try {
-        const artistsSnap = await getDocs(artistsCol);
+        forkJoin([getDocs(artistsCol), getDocs(locationsCol)]).subscribe(([artistsSnap, locationsSnap]) => {
 
-        this.artists = artistsSnap.docs.map(d => {
-          const a = d.data() as Artist;
-          return { id: d.id, fullName: a.fullName, artwork: (a.artwork || []) } as Artist;
+          this.artists = artistsSnap.docs.map(d => {
+            const a = d.data() as Artist;
+            const artworks = (a.artwork || []).map((aw: any) => ({
+              id: aw.id,
+              name: aw.name,
+              description: aw.description,
+              fileName: aw.fileName,
+              locationId: aw.locationId || ''
+            } as Artwork));
+            return { id: d.id, fullName: a.fullName, artwork: artworks } as Artist;
+          });
+
+          this.locations = locationsSnap.docs.map(d => ({ id: d.id, label: (d.data() as ArtLocation).name } as DropdownItem));
         });
-      } catch (err) {
-        console.error('Failed to load artists or artworks', err);
-      }
+      } catch (err) { console.error('Failed to load artists or locations', err); }
     });
   }
 
@@ -151,7 +166,8 @@ export class ManageArtistComponent implements OnInit {
         const artwork: Artwork = {
           id: newId,
           name: entry.newArtwork?.name || '',
-          location: entry.newArtwork?.location || '',
+          // store selected location id
+          locationId: entry.newArtwork?.locationId || '',
           fileName: entry.newArtwork?.fileName || '',
           description: entry.newArtwork?.description || ''
         } as Artwork;
@@ -211,7 +227,15 @@ export class ManageArtistComponent implements OnInit {
     if (!this.artworkEditingMap[artist.id]) {
       this.artworkEditingMap[artist.id] = { editingArtwork: null, newArtwork: null };
     };
-    this.artworkEditingMap[artist.id].newArtwork = { name: '', location: '', fileName: '' };
+    // newArtwork should include locationId for dropdown binding
+    this.artworkEditingMap[artist.id].newArtwork = { name: '', locationId: '', fileName: '' };
+  }
+
+  // helper to resolve location label from id for display
+  locationLabel(locationId?: string) {
+    if (!locationId) return '';
+    const found = this.locations.find(l => l.id === locationId);
+    return found ? found.label : locationId;
   }
 
   // Cancel showing the new artwork form for an artist

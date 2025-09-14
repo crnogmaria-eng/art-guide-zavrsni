@@ -2,6 +2,6 @@ export interface Artwork {
   id: string;
   name: string;
   description: string;
-  location: string;
+  locationId: string;
   fileName: string;
 }

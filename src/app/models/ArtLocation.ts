@@ -3,4 +3,5 @@ export interface ArtLocation {
     name: string;
     address: string;
     styles: string[];
+    date: Date;
 }

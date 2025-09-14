@@ -10,6 +10,8 @@ import { Ticket } from '../../models/Ticket';
 import { AuthService } from '../../services/auth.service';
 import { Artist } from '../../models/Artist';
 import { ShowArtwork } from '../../models/ShowArtwork';
+import { ArtLocation } from '../../models/ArtLocation';
+import { forkJoin, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-artist-search',
@@ -21,25 +23,46 @@ import { ShowArtwork } from '../../models/ShowArtwork';
 export class ArtistSearchComponent {
   query: string = '';
   results: ShowArtwork[] = [];
+  locations: ArtLocation[] = [];
   selectedArtwork: ShowArtwork | null = null;
   ticketPurchased: boolean = false;
   private artists: Artist[] = [];
   private firestore: Firestore = inject(Firestore);
+  private userSubscription: Subscription | null = null;
 
   constructor(private authService: AuthService, private injector: Injector) { }
 
-  ngOnInit() {
-    runInInjectionContext(this.injector, async () => {
+  async ngOnInit() {
+    await runInInjectionContext(this.injector, async () => {
       const artistsRef = collection(this.firestore, 'artist');
-      const artistsSnap = await getDocs(artistsRef);
+      const locationsRef = collection(this.firestore, 'locations');
 
-      this.artists = artistsSnap.docs.map(d => {
-        const a = d.data() as Artist;
-        a.id = d.id;
-        return a;
+      forkJoin([getDocs(artistsRef), getDocs(locationsRef)]).subscribe(([artistsSnap, locationsSnap]) => {
+        this.locations = locationsSnap.docs.map(d => {
+          const loc = d.data() as ArtLocation;
+          loc.id = d.id;
+          return loc;
+        });
+
+        this.artists = artistsSnap.docs.map(d => {
+          const a = d.data() as Artist;
+          a.id = d.id;
+          return a;
+        });
       });
     });
 
+    this.userSubscription = this.authService.currentUser.subscribe(user => {
+      if (user && this.selectedArtwork) {
+        this.ticketPurchased = user.tickets?.some(t => t.locationId === this.selectedArtwork?.locationId) || false;
+      } else {
+        this.ticketPurchased = false;
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.userSubscription?.unsubscribe();
   }
 
   async search() {
@@ -50,11 +73,18 @@ export class ArtistSearchComponent {
     const matchingArtists = this.artists.filter(a => a.fullName.toLowerCase().includes(q));
 
     this.results = matchingArtists.map(a => a.artwork.map(artwork => {
+      const normalized = {
+        ...artwork,
+        // support legacy 'location' property
+        locationId: artwork.locationId
+      } as Artwork;
+
       const showArtwork: ShowArtwork =
       {
-        ...artwork,
+        ...normalized,
         artistName: a.fullName,
-        imagePath: `/assets/artworks/${artwork.fileName}`
+        imagePath: `/assets/artworks/${normalized.fileName}`,
+        locationName: this.locations.find(l => l.id === normalized.locationId)?.name || 'Nepoznato'
       };
       return showArtwork;
     })).flat();
@@ -66,16 +96,18 @@ export class ArtistSearchComponent {
 
   selectArtwork(artwork: ShowArtwork) {
     this.selectedArtwork = artwork;
-    this.ticketPurchased = this.authService.user?.tickets?.some(t => t.artworkId === artwork.id) || false;
+    this.ticketPurchased = this.authService.user?.tickets?.some(t => t.locationId === artwork.locationId) || false;
   }
 
   async buyTicket() {
     const user = this.authService.user;
     if (!user || !this.selectedArtwork) return;
 
+    const location = this.locations.find(l => l.id === this.selectedArtwork?.locationId);
+
+    // use selected artwork's locationId directly (locations may not be loaded)
     const ticketData: Ticket = {
-      artworkId: this.selectedArtwork.id,
-      date: new Date().toISOString(),
+      locationId: location?.id || this.selectedArtwork.locationId,
       purchasedAt: new Date().toISOString()
     };
 

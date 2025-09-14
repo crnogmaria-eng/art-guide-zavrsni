@@ -14,7 +14,7 @@
   <div *ngFor="let item of results" class="artwork-card" (click)="selectArtwork(item)">
     <div [style.backgroundImage]="'url(' + item.imagePath + ')'" class="artwork-card-image"></div>
     <h3>{{ item.name }}</h3>
-    <!-- <p>📍 <strong>Lokacija:</strong> {{ item.location }}</p> -->
+    <!-- <p>📍 <strong>Lokacija:</strong> {{ item.locationId }}</p> -->
   </div>
 </div>
 
@@ -25,7 +25,7 @@
 
     <h3>{{ selectedArtwork.name }}</h3>
     <p><strong>Umjetnik:</strong> {{ selectedArtwork.artistName }}</p>
-    <p><strong>Lokacija:</strong> {{ selectedArtwork.location }}</p>
+    <p><strong>Lokacija:</strong> {{ selectedArtwork.locationName }}</p>
     <p><strong>Opis:</strong> {{ selectedArtwork.description }}</p>
 
     <img *ngIf="selectedArtwork.imagePath" [src]="selectedArtwork.imagePath" alt="Slika umjetničkog djela"

@@ -4,14 +4,13 @@
 
     <h4 class="mb-4">🎟️ Kupljene ulaznice</h4>
 
-    <div *ngIf="(tickets$ | async)?.length; else noTickets" class="ticket-grid">
-      <div *ngFor="let ticket of (tickets$ | async)" class="ticket-card">
+    <div *ngIf="showTickets; else noTickets" class="ticket-grid">
+      <div *ngFor="let ticket of showTickets" class="ticket-card">
 
         <div class="ticket-content">
-          <h5>{{ ticket.title }}</h5>
-          <p><span class="icon">🎨</span> <strong>Umjetnik:</strong> {{ ticket.artist }}</p>
-          <p><span class="icon">📍</span> <strong>Lokacija:</strong> {{ ticket.location }}</p>
+          <p><span class="icon">📍</span> <strong>Lokacija:</strong> {{ ticket.locationName }}</p>
           <p><span class="icon">🕒</span> <strong>Kupljeno:</strong> {{ ticket.purchasedAt | date:'short' }}</p>
+          <p><span class="icon">🕒</span> <strong>Datum Izlozbe:</strong> {{ ticket.date }}</p>
         </div>
 
       </div>
@@ -21,7 +20,7 @@
       <p class="text-center">⛔ Nema kupljenih ulaznica.</p>
     </ng-template>
 
-    
+
     <div class="mt-5">
       <h4>🎨 Preferirani stilovi</h4>
       <ul *ngIf="preferences.length; else noPrefs">
@@ -33,7 +32,3 @@
     </div>
   </div>
 </section>
-
-
-
-

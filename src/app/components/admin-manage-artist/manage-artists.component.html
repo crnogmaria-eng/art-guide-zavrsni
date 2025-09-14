@@ -66,7 +66,7 @@
                                                 *ngIf="!(artworkEditingMap[artist.id]?.editingArtwork?.id === aw.id); else editArtworkTpl">
                                                 <td class="mono">{{ aw.id }}</td>
                                                 <td>{{ aw.name }}</td>
-                                                <td>{{ aw.location }}</td>
+                                                <td>{{ locationLabel(aw.locationId) }}</td>
                                                 <td>{{ aw.description }}</td>
                                                 <td>{{ aw.fileName }}</td>
                                                 <td class="actions">
@@ -82,8 +82,13 @@
                                                 <td><input type="text"
                                                         [(ngModel)]="artworkEditingMap[artist.id].editingArtwork!.name" />
                                                 </td>
-                                                <td><input type="text"
-                                                        [(ngModel)]="artworkEditingMap[artist.id].editingArtwork!.location" />
+                                                <td>
+                                                    <select
+                                                        [(ngModel)]="artworkEditingMap[artist.id].editingArtwork!.locationId">
+                                                        <option value="">(none)</option>
+                                                        <option *ngFor="let loc of locations" [value]="loc.id">{{
+                                                            loc.label }}</option>
+                                                    </select>
                                                 </td>
                                                 <td><input type="text"
                                                         [(ngModel)]="artworkEditingMap[artist.id].editingArtwork!.description" />
@@ -104,7 +109,13 @@
                                             *ngIf="artworkEditingMap[artist.id] && artworkEditingMap[artist.id].newArtwork as newAw">
                                             <td class="mono">(new)</td>
                                             <td><input type="text" [(ngModel)]="newAw.name" /></td>
-                                            <td><input type="text" [(ngModel)]="newAw.location" /></td>
+                                            <td>
+                                                <select [(ngModel)]="newAw.locationId">
+                                                    <option value="">(none)</option>
+                                                    <option *ngFor="let loc of locations" [value]="loc.id">{{ loc.label
+                                                        }}</option>
+                                                </select>
+                                            </td>
                                             <td><input type="text" [(ngModel)]="newAw.description" /></td>
                                             <td><input type="text" [(ngModel)]="newAw.fileName" /></td>
                                             <td class="actions">

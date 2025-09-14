@@ -1,5 +1,4 @@
 export interface Ticket {
-    artworkId: string;
-    date: string;
+    locationId: string;
     purchasedAt: string;
 }

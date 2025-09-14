@@ -2,12 +2,14 @@ import { Component, Injector, OnInit, runInInjectionContext } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Firestore, collection, doc, updateDoc, deleteDoc, getDocs } from '@angular/fire/firestore';
-import { forkJoin, take } from 'rxjs';
+import { forkJoin, Subscription, take } from 'rxjs';
 import { AppUser } from '../../models/AppUser';
 import { Ticket } from '../../models/Ticket';
 import { Artwork } from '../../models/Artwork';
 import { EditAppUser } from '../../models/EditAppUser';
 import { Preferenca } from '../../models/Preferenca';
+import { ArtLocation } from '../../models/ArtLocation';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-manage-users',
@@ -19,31 +21,48 @@ import { Preferenca } from '../../models/Preferenca';
 export class ManageUsersComponent implements OnInit {
   users: Array<EditAppUser> = [];
   artworks: Artwork[] = [];
-
+  locations: ArtLocation[] = [];
   editingUser: (Partial<EditAppUser> | null) = null;
+  userSubscription: Subscription | null = null;
+  currentUserId: string | null = null;
 
-  constructor(private firestore: Firestore, private injector: Injector) { }
+  constructor(private firestore: Firestore, private injector: Injector, private authService: AuthService) { }
 
   async ngOnInit() {
     await runInInjectionContext(this.injector, async () => {
       const usersCol = collection(this.firestore, 'users');
       const artistCol = collection(this.firestore, 'artist');
+      const locationsCol = collection(this.firestore, 'locations');
 
-      forkJoin([getDocs(usersCol), getDocs(artistCol)]).pipe(take(1)).subscribe(([usersSnap, artistsSnap]) => {
+      forkJoin([getDocs(usersCol), getDocs(artistCol), getDocs(locationsCol)]).pipe(take(1)).subscribe(([usersSnap, artistsSnap, locationsSnap]) => {
         this.artworks = artistsSnap.docs.map(doc => doc.data() as Artwork);
+        this.locations = locationsSnap.docs.map(doc => {
+          const data = doc.data() as ArtLocation;
+          data.id = doc.id;
+          data.date
+          return data;
+        });
 
         this.users = usersSnap.docs.map(doc => {
           const data = doc.data() as EditAppUser;
           data.id = doc.id;
           data.preferencesString = (data.preferences || []).join(', ');
-          data.ticketsString = ((data.tickets || []).filter(x => this.artworks.find(e => e.id == x.artworkId))
-            .map(x => this.artworks.find(e => e.id == x.artworkId)?.id)).join(', ');
+          data.ticketsString = ((data.tickets || []).filter(x => this.locations.find(e => e.id == x.locationId))
+            .map(x => this.locations.find(e => e.id == x.locationId)?.id)).join(', ');
           return data;
         });
       });
 
     });
 
+    this.userSubscription = this.authService.currentUser.subscribe(user => {
+      this.currentUserId = user?.id || null;
+    });
+
+  }
+
+  ngOnDestroy() {
+    this.userSubscription?.unsubscribe();
   }
 
   // Begin editing a user
@@ -51,8 +70,6 @@ export class ManageUsersComponent implements OnInit {
     // expose comma-separated strings for easier editing in inputs
     this.editingUser = user;
   }
-
-
 
   // Save changes from editingUser back to Firestore
   async saveEdit() {
@@ -70,24 +87,27 @@ export class ManageUsersComponent implements OnInit {
       const ticketIds = (this.editingUser.ticketsString || '')
         .split(',')
         .map((s: string) => s.trim())
-        .map((t: string) => this.artworks.find(a => a.id === t)?.id)
+        .map((t: string) => this.locations.find(a => a.id === t)?.id)
         .filter(Boolean);
 
-      const newTickets: Ticket[] = ticketIds.filter(t => t !== '' && !this.editingUser?.tickets?.some(x => x.artworkId === t)).map(t => {
-        const artwork = this.artworks.find(a => a.id === t);
-        return { artworkId: artwork?.id, date: new Date().toISOString(), purchasedAt: new Date().toISOString() } as Ticket;
+      const newTickets: Ticket[] = ticketIds.filter(t => t !== '' && !this.editingUser?.tickets?.some(x => x.locationId === t)).map(t => {
+        const location = this.locations.find(l => l.id === t);
+        return { locationId: location?.id, purchasedAt: new Date().toISOString() } as Ticket;
       });
 
-      const updatedTickets: Ticket[] = (this.editingUser.tickets || []).filter(t => ticketIds.includes(t.artworkId));
+      const updatedTickets: Ticket[] = (this.editingUser.tickets || []).filter(t => ticketIds.includes(t.locationId));
 
       updatedState.tickets = [...updatedTickets, ...newTickets];
 
       updatedState.preferences = preferences;
 
       this.editingUser.preferencesString = preferences.join(', ');
-      this.editingUser.ticketsString = updatedState.tickets.map(x => x.artworkId).join(', ');
+      this.editingUser.ticketsString = updatedState.tickets.map(x => x.locationId).join(', ');
 
       await updateDoc(userRef, { ...updatedState });
+      if (this.editingUser?.id === this.currentUserId) {
+        this.authService.updateUserRef();
+      };
       this.editingUser = null;
     } catch (err) {
       console.error('Failed to save user edits', err);
